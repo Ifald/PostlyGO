@@ -1,28 +1,21 @@
 const express = require("express");
 const router = express.Router();
+const userController = require("../controllers/userController");
 const authMiddleware = require("../middlewares/authMiddleware");
-const upload = require("../middlewares/uploadMiddleware");
+const multer = require("multer");
 
-// Приватный маршрут: получить данные пользователя
-router.get("/profile", authMiddleware, (req, res) => {
-  res.json({ message: "Welcome to your profile", user: req.user });
-});
+// Настройки для загрузки файлов
+const upload = multer({ dest: "public/uploads/avatars/" });
+
+// Получение профиля пользователя
+router.get("/profile", authMiddleware, userController.getUserProfile);
 
 // Загрузка аватара
 router.post(
   "/upload-avatar",
   authMiddleware,
   upload.single("avatar"),
-  (req, res) => {
-    try {
-      const filePath = `/uploads/avatars/${req.file.filename}`;
-      res
-        .status(200)
-        .json({ message: "Avatar uploaded successfully", filePath });
-    } catch (error) {
-      res.status(500).json({ message: "Server error", error });
-    }
-  }
+  userController.uploadAvatar
 );
 
 module.exports = router;
