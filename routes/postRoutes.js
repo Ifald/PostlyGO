@@ -39,20 +39,31 @@ router.get("/", async (req, res) => {
 // Удалить пост
 router.delete("/:id", authMiddleware, async (req, res) => {
   try {
+    console.log("User ID from token:", req.user.id);
+    console.log("Post ID to delete:", req.params.id);
+
     const post = await Post.findById(req.params.id);
 
     if (!post) {
+      console.log("Post not found");
       return res.status(404).json({ message: "Post not found" });
     }
 
-    // Проверка прав
+    console.log("Post owner ID:", post.user.toString());
+
     if (post.user.toString() !== req.user.id) {
-      return res.status(401).json({ message: "Unauthorized" });
+      console.log("Unauthorized: User does not own the post");
+      return res
+        .status(401)
+        .json({ message: "Unauthorized: You can delete only your own posts" });
     }
 
-    await post.remove();
+    // Удаление поста
+    await Post.deleteOne({ _id: req.params.id });
+    console.log("Post deleted successfully");
     res.status(200).json({ message: "Post deleted successfully" });
   } catch (error) {
+    console.error("Error deleting post:", error);
     res.status(500).json({ message: "Server error", error });
   }
 });

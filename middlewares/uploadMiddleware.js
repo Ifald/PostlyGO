@@ -4,7 +4,11 @@ const path = require("path");
 // Настройка хранилища
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "public/uploads/avatars");
+    const folder =
+      file.fieldname === "avatar"
+        ? "public/uploads/avatars"
+        : "public/uploads/posts";
+    cb(null, folder);
   },
   filename: (req, file, cb) => {
     const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
