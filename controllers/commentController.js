@@ -27,14 +27,13 @@ exports.addComment = async (req, res) => {
     await newComment.save();
 
     // Створення сповіщення
-    if (post.user.toString() !== userId) {
+    if (post.user.toString() !== req.user.id) {
       const notification = new Notification({
-        user: post.user,
+        user: post.user, // автор поста
         type: "comment",
         message: `${req.user.name} прокоментував ваш пост`,
         post: postId,
       });
-      console.log("Створюється сповіщення:", notification);
       await notification.save();
     }
 

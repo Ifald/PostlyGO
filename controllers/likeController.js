@@ -22,14 +22,13 @@ exports.likePost = async (req, res) => {
       await newLike.save();
 
       // Створення сповіщення про лайк
-      if (post.user.toString() !== userId) {
+      if (post.user.toString() !== req.user.id) {
         const notification = new Notification({
-          user: post.user,
+          user: post.user, // автор поста
           type: "like",
           message: `${req.user.name} вподобав ваш пост`,
           post: postId,
         });
-        console.log("Створюється сповіщення:", notification);
         await notification.save();
       }
 
