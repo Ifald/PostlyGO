@@ -1,11 +1,12 @@
 const express = require("express");
+const { registerUser, loginUser } = require("../controllers/authController");
+
 const router = express.Router();
-const authController = require("../controllers/authController");
 
-// Регистрация пользователя
-router.post("/register", authController.register);
+// Маршрут для реєстрації
+router.post("/register", registerUser);
 
-// Логин пользователя
-router.post("/login", authController.login);
+// Маршрут для авторизації
+router.post("/login", loginUser);
 
 module.exports = router;

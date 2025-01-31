@@ -1,19 +1,10 @@
 const express = require("express");
-const router = express.Router();
-const {
-  addComment,
-  getComments,
-  deleteComment,
-} = require("../controllers/commentController");
+const { addComment } = require("../controllers/commentController");
 const authMiddleware = require("../middlewares/authMiddleware");
 
-// Маршрут для створення коментаря
-router.post("/:postId/comments", authMiddleware, addComment);
+const router = express.Router();
 
-// Маршрут для отримання коментарів поста
-router.get("/:postId/comments", authMiddleware, getComments);
-
-// Маршрут для видалення коментаря
-router.delete("/:postId/comments/:commentId", authMiddleware, deleteComment);
+// Маршрут для додавання коментаря
+router.post("/:postId/comment", authMiddleware, addComment);
 
 module.exports = router;

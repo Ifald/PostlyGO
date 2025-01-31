@@ -1,29 +1,28 @@
 const express = require("express");
-const router = express.Router();
-const postController = require("../controllers/postController");
-const authMiddleware = require("../middlewares/authMiddleware");
 const {
-  addComment,
-  getComments,
-  deleteComment,
-} = require("../controllers/commentController");
+  createPost,
+  getPosts,
+  getPostById,
+  updatePost,
+  deletePost,
+} = require("../controllers/postController");
+const authMiddleware = require("../middlewares/authMiddleware");
 
-// Создание поста (только для авторизованных пользователей)
-router.post("/", authMiddleware, postController.createPost);
+const router = express.Router();
 
-// Получение всех постов
-router.get("/", postController.getAllPosts);
+// Створення нового поста
+router.post("/", authMiddleware, createPost);
 
-// Удаление поста (только для автора поста)
-router.delete("/:id", authMiddleware, postController.deletePost);
+// Отримання всіх постів
+router.get("/", authMiddleware, getPosts);
 
-// Добавить комментарий
-router.post("/:postId/comments", authMiddleware, addComment);
+// Отримання конкретного поста за ID
+router.get("/:postId", authMiddleware, getPostById);
 
-// Получить комментарии поста
-router.get("/:postId/comments", getComments);
+// Оновлення поста за ID
+router.put("/:postId", authMiddleware, updatePost);
 
-// Удалить комментарий
-router.delete("/comments/:commentId", authMiddleware, deleteComment);
+// Видалення поста за ID
+router.delete("/:postId", authMiddleware, deletePost);
 
 module.exports = router;

@@ -1,59 +1,96 @@
 const Post = require("../models/postModel");
 
-// Создание нового поста
+// Створення нового поста
 exports.createPost = async (req, res) => {
   try {
     const { title, content } = req.body;
-    const userId = req.user.id;
-
-    const newPost = new Post({
+    const post = new Post({
       title,
       content,
-      user: userId,
+      user: req.user.id,
     });
-
-    await newPost.save();
-
-    res
-      .status(201)
-      .json({ message: "Post created successfully", post: newPost });
+    await post.save();
+    res.status(201).json(post);
   } catch (error) {
-    res.status(500).json({ message: "Failed to create post", error });
+    res.status(500).json({ message: "Помилка сервера", error });
   }
 };
 
-// Получение всех постов
-exports.getAllPosts = async (req, res) => {
+// Отримання всіх постів
+exports.getPosts = async (req, res) => {
   try {
-    const posts = await Post.find().populate("user", "username");
+    const posts = await Post.find().populate("user", "name");
     res.status(200).json(posts);
   } catch (error) {
-    res.status(500).json({ message: "Failed to fetch posts", error });
+    res.status(500).json({ message: "Помилка сервера", error });
   }
 };
 
-// Удаление поста
-exports.deletePost = async (req, res) => {
+// Отримання поста за ID
+exports.getPostById = async (req, res) => {
   try {
-    const { id } = req.params;
-    const userId = req.user.id;
+    const { postId } = req.params;
+    const post = await Post.findById(postId).populate("user", "name");
+    if (!post) return res.status(404).json({ message: "Пост не знайдено" });
+    res.status(200).json(post);
+  } catch (error) {
+    res.status(500).json({ message: "Помилка сервера", error });
+  }
+};
 
-    const post = await Post.findById(id);
+// Оновлення поста
+exports.updatePost = async (req, res) => {
+  try {
+    const { postId } = req.params;
+    const { title, content } = req.body;
 
-    if (!post) {
-      return res.status(404).json({ message: "Post not found" });
-    }
+    const post = await Post.findById(postId);
+    if (!post) return res.status(404).json({ message: "Пост не знайдено" });
 
-    if (post.user.toString() !== userId) {
+    if (post.user.toString() !== req.user.id) {
       return res
         .status(403)
-        .json({ message: "Unauthorized to delete this post" });
+        .json({ message: "Ви не можете оновлювати цей пост" });
     }
 
-    await post.remove();
+    post.title = title || post.title;
+    post.content = content || post.content;
+    await post.save();
 
-    res.status(200).json({ message: "Post deleted successfully" });
+    res.status(200).json(post);
   } catch (error) {
-    res.status(500).json({ message: "Failed to delete post", error });
+    res.status(500).json({ message: "Помилка сервера", error });
+  }
+};
+
+// Видалення поста
+exports.deletePost = async (req, res) => {
+  try {
+    const { postId } = req.params;
+    console.log(`Пост ID: ${postId}`);
+
+    const post = await Post.findById(postId);
+    if (!post) {
+      console.log("Пост не знайдено");
+      return res.status(404).json({ message: "Пост не знайдено" });
+    }
+
+    console.log(`Автор поста: ${post.user}`);
+    console.log(`Автор запиту: ${req.user.id}`);
+
+    if (post.user.toString() !== req.user.id) {
+      console.log("Авторизація не пройдена");
+      return res
+        .status(403)
+        .json({ message: "Ви не можете видалити цей пост" });
+    }
+
+    // Використовуємо deleteOne для видалення
+    await Post.deleteOne({ _id: postId });
+    console.log("Пост видалено успішно");
+    res.status(200).json({ message: "Пост видалено" });
+  } catch (error) {
+    console.error("Помилка сервера:", error);
+    res.status(500).json({ message: "Помилка сервера", error });
   }
 };

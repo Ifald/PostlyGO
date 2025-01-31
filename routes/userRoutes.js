@@ -4,13 +4,13 @@ const userController = require("../controllers/userController");
 const authMiddleware = require("../middlewares/authMiddleware");
 const multer = require("multer");
 
-// Настройки для загрузки файлов
+// Налаштування для завантаження файлів
 const upload = multer({ dest: "public/uploads/avatars/" });
 
-// Получение профиля пользователя
-router.get("/profile", authMiddleware, userController.getUserProfile);
+// Отримання профілю користувача
+router.get("/me", authMiddleware, userController.getUserProfile); // Змінив "/profile" на "/me"
 
-// Загрузка аватара
+// Завантаження аватара
 router.post(
   "/upload-avatar",
   authMiddleware,
