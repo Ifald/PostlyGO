@@ -1,5 +1,6 @@
 const Comment = require("../models/commentModel");
 const Post = require("../models/postModel");
+const Notification = require("../models/notificationModel");
 
 exports.addComment = async (req, res) => {
   try {
@@ -24,6 +25,18 @@ exports.addComment = async (req, res) => {
       text,
     });
     await newComment.save();
+
+    // Створення сповіщення
+    if (post.user.toString() !== userId) {
+      const notification = new Notification({
+        user: post.user,
+        type: "comment",
+        message: `${req.user.name} прокоментував ваш пост`,
+        post: postId,
+      });
+      console.log("Створюється сповіщення:", notification);
+      await notification.save();
+    }
 
     res.status(201).json({
       message: "Коментар додано",

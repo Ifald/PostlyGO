@@ -1,5 +1,6 @@
 const Like = require("../models/likeModel");
 const Post = require("../models/postModel");
+const Notification = require("../models/notificationModel");
 
 exports.likePost = async (req, res) => {
   try {
@@ -7,7 +8,9 @@ exports.likePost = async (req, res) => {
     const userId = req.user.id;
 
     const post = await Post.findById(postId);
-    if (!post) return res.status(404).json({ message: "Пост не знайдено" });
+    if (!post) {
+      return res.status(404).json({ message: "Пост не знайдено" });
+    }
 
     const existingLike = await Like.findOne({ user: userId, post: postId });
 
@@ -17,9 +20,22 @@ exports.likePost = async (req, res) => {
     } else {
       const newLike = new Like({ user: userId, post: postId });
       await newLike.save();
+
+      // Створення сповіщення про лайк
+      if (post.user.toString() !== userId) {
+        const notification = new Notification({
+          user: post.user,
+          type: "like",
+          message: `${req.user.name} вподобав ваш пост`,
+          post: postId,
+        });
+        console.log("Створюється сповіщення:", notification);
+        await notification.save();
+      }
+
       return res.status(201).json({ message: "Пост вподобано" });
     }
   } catch (error) {
-    return res.status(500).json({ message: "Помилка сервера", error });
+    res.status(500).json({ message: "Помилка сервера", error });
   }
 };
