@@ -8,6 +8,7 @@ const postRoutes = require("./routes/postRoutes");
 const commentRoutes = require("./routes/commentRoutes");
 const likeRoutes = require("./routes/likeRoutes"); // Додано для лайків
 const notificationRoutes = require("./routes/notificationRoutes");
+const followRoutes = require("./routes/followRoutes");
 
 dotenv.config();
 
@@ -26,6 +27,7 @@ app.use("/api/posts", postRoutes);
 app.use("/api/comments", commentRoutes);
 app.use("/api/likes", likeRoutes); // Додано для лайків
 app.use("/api/notifications", notificationRoutes);
+app.use("/api/follows", followRoutes); // Змінено базовий шлях для підписок
 
 const PORT = process.env.PORT || 5000;
 
